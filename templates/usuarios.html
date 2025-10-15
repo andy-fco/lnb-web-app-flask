@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Usuarios</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body>
+    <h1>Ver Perfil Usuario</h1>
+    <form method="POST">
+        <input type="number" name="id" placeholder="Ingrese id">
+        <button type="submit">Buscar</button>
+    </form>
+    {% if Users %}
+    <!-- 
+    <p>{{Users}}</p>
+    -->
+        {% if Users.error %}
+        <p>{{ Users.error }}</p>
+        {% else %}
+        <h2>name: {{ Users.name}}</h2>
+        <p>email: {{ Users.email }}</p>
+        avatar: <img src="{{Users.avatar}}" alt="No encontrado"> 
+        <p>{{Users.avatar}}</p>
+        {% endif %}
+    {% endif %}
+
+    <a href='/protected'>Ver perfil</a>
+</body>
+</html>

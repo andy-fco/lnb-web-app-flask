@@ -1,0 +1,114 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Fondo oscuro con gradiente */
+body {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: #e0e0ff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Contenedor central */
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 2rem;
+}
+
+/* Títulos */
+h1, h2, h3 {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: #b19cd9;
+    text-shadow: 0 0 8px rgba(150, 120, 255, 0.6);
+}
+
+/* Inputs */
+input, select {
+    padding: 0.8rem;
+    margin: 0.5rem 0 1rem;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    outline: none;
+    transition: 0.3s;
+    width: 50%;
+}
+
+input:focus, select:focus {
+    background: rgba(255,255,255,0.2);
+    box-shadow: 0 0 10px #7b61ff;
+    
+}
+
+/* Botones */
+button, .btn ,a {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(90deg, #6a11cb, #2575fc);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.3s;
+}
+
+button:hover, .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(120, 80, 255, 0.8);
+}
+
+/* Links */
+a {
+    color: #80d0ff;
+    text-decoration: none;
+    transition: 0.3s;
+    width: 100px;
+    margin: 10px;
+}
+
+a:hover {
+    color: #b19cd9;
+}
+
+/* Tarjetas (por ejemplo para clima, usuarios, etc.) */
+.card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 25px rgba(120, 80, 255, 0.6);
+}
+
+/* Navbar simple */
+.navbar {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(5px);
+    position: sticky;
+    top: 0;
+}
+
+.navbar a {
+    font-weight: bold;
+    color: #fff;
+}
