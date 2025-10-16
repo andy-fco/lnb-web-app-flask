@@ -1,0 +1,86 @@
+/* Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #2d2d2d;
+}
+
+/*nav*/
+#nav {
+  background-color: #e70000;
+}
+
+nav a {
+  color: rgb(255, 254, 255) !important;
+}
+
+.nav-link {
+  white-space: nowrap;
+}
+
+/*login*/
+#login {
+  background-color: #e70000 !important;
+  color: rgb(255, 254, 255);
+  padding: 10px;
+
+  border-radius: 5px;
+  text-align: center;
+  width: 100px;
+  margin: auto;
+}
+
+/* Contenedor central */
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 2rem;
+}
+
+/* Títulos */
+h1,
+h2,
+h3 {
+  text-align: center;
+  margin-top: 1rem;
+  color: #ebebeb;
+  text-shadow: 0 0 8px rgba(150, 120, 255, 0.6);
+}
+
+/* Inputs */
+input,
+select {
+  padding: 0.8rem;
+  margin: 0.5rem 0 1rem;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  outline: none;
+  transition: 0.3s;
+  width: 50%;
+}
+
+input:focus,
+select:focus {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 10px #7b61ff;
+}
+
+/* Links */
+a {
+  color: #80d0ff;
+  text-decoration: none;
+  transition: 0.3s;
+  width: 100px;
+  margin: 10px;
+}
+
+a:hover {
+  color: #b19cd9;
+}
