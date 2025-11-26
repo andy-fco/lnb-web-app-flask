@@ -1,0 +1,70 @@
+{% extends "admin_base.html" %} {% block title %}Equipos - Admin{% endblock %}
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">Gestión de Equipos</h1>
+
+<!-- BUSCADOR -->
+<form
+  method="get"
+  action="{{ url_for('admin_equipos') }}"
+  class="mb-6 flex gap-3"
+>
+  <input
+    type="text"
+    name="q"
+    value="{{ q }}"
+    placeholder="Buscar por nombre o ciudad..."
+    class="px-4 py-2 rounded bg-secundario border border-gray-700 w-72"
+  />
+  <button class="px-4 py-2 bg-acento text-black rounded hover:bg-red-700">
+    Buscar
+  </button>
+</form>
+
+<!-- BOTÓN CREAR NUEVO -->
+<a
+  href="{{ url_for('admin_equipo_crear') }}"
+  class="px-4 py-2 bg-red-600 rounded text-black font-semibold hover:bg-red-700 transition inline-block mb-4"
+>
+  + Crear nuevo equipo
+</a>
+
+<!-- LISTADO TIPO FILA -->
+<div class="flex flex-col gap-3">
+  {% for e in equipos %}
+  <div
+    class="bg-secundario border border-gray-700 rounded-lg p-4 flex items-center justify-between"
+  >
+    <!-- INFO -->
+    <div>
+      <p class="text-lg font-semibold">{{ e.nombre }}</p>
+      <p class="text-gray-400 text-sm">{{ e.ciudad }}</p>
+
+      <p class="text-sm mt-1">
+        Temporadas: <span class="font-semibold">{{ e.temporadas }}</span> •
+        Campeonatos: <span class="font-semibold">{{ e.campeonatos }}</span>
+      </p>
+    </div>
+
+    <!-- ACCIONES -->
+    <div class="flex gap-3">
+      <a
+        href="{{ url_for('admin_equipo_editar', id=e.id) }}"
+        class="px-3 py-1 bg-blue-600 text-black rounded hover:bg-blue-700"
+      >
+        Editar
+      </a>
+
+      <a
+        href="{{ url_for('admin_equipo_eliminar', id=e.id) }}"
+        class="px-3 py-1 bg-red-600 text-black rounded hover:bg-red-700"
+        onclick="return confirm('¿Eliminar equipo?');"
+      >
+        Eliminar
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

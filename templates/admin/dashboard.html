@@ -1,0 +1,56 @@
+{% extends "admin_base.html" %} {% block title %}Panel de administración{%
+endblock %} {% block content %}
+
+<h1 class="text-3xl font-bold mb-8">Panel de Administración</h1>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  <a
+    href="{{ url_for('admin_usuarios') }}"
+    class="bg-secundario border border-gray-700 rounded-xl p-6 shadow hover:bg-gray-800 hover:scale-[1.02] transition flex flex-col items-center text-center"
+  >
+    <span class="text-2xl font-bold mb-2">Usuarios</span>
+    <span class="text-gray-400">Administradores y aficionados</span>
+  </a>
+
+  <a
+    href="{{ url_for('admin_equipos') }}"
+    class="bg-secundario border border-gray-700 rounded-xl p-6 shadow hover:bg-gray-800 hover:scale-[1.02] transition flex flex-col items-center text-center"
+  >
+    <span class="text-2xl font-bold mb-2">Equipos</span>
+    <span class="text-gray-400">Gestión completa de equipos</span>
+  </a>
+
+  <a
+    href="{{ url_for('admin_jugadores') }}"
+    class="bg-secundario border border-gray-700 rounded-xl p-6 shadow hover:bg-gray-800 hover:scale-[1.02] transition flex flex-col items-center text-center"
+  >
+    <span class="text-2xl font-bold mb-2">Jugadores</span>
+    <span class="text-gray-400">Gestión de jugadores </span>
+  </a>
+
+  <a
+    href="{{ url_for('admin_articulos') }}"
+    class="bg-secundario border border-gray-700 rounded-xl p-6 shadow hover:bg-gray-800 hover:scale-[1.02] transition flex flex-col items-center text-center"
+  >
+    <span class="text-2xl font-bold mb-2">Artículos</span>
+    <span class="text-gray-400">Noticias y contenido editorial</span>
+  </a>
+
+  <a
+    href="{{ url_for('admin_eventos') }}"
+    class="bg-secundario border border-gray-700 rounded-xl p-6 shadow hover:bg-gray-800 hover:scale-[1.02] transition flex flex-col items-center text-center"
+  >
+    <span class="text-2xl font-bold mb-2">Eventos</span>
+    <span class="text-gray-400">Activaciones y encuentros</span>
+  </a>
+
+  <a
+    href="{{ url_for('admin_dts') }}"
+    class="bg-secundario border border-gray-700 rounded-xl p-6 shadow hover:bg-gray-800 hover:scale-[1.02] transition flex flex-col items-center text-center"
+  >
+    <span class="text-2xl font-bold mb-2">Directores Técnicos</span>
+    <span class="text-gray-400">Gestión de entrenadores</span>
+  </a>
+</div>
+
+{% endblock %}

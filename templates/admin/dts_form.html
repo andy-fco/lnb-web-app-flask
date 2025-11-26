@@ -1,0 +1,77 @@
+{% extends "admin_base.html" %}
+{% block title %}
+    {% if dt %}Editar DT{% else %}Crear DT{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">
+    {% if dt %}Editar DT{% else %}Crear DT{% endif %}
+</h1>
+
+<form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <div>
+        <label>Nombre</label>
+        <input type="text" name="nombre" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ dt.nombre if dt else '' }}" required>
+    </div>
+
+    <div>
+        <label>Apellido</label>
+        <input type="text" name="apellido" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ dt.apellido if dt else '' }}" required>
+    </div>
+
+    <div>
+        <label>Fecha de nacimiento</label>
+        <input type="date" name="fecha_nacimiento" class="w-full p-2 bg-gray-800 rounded"
+        value="{{ dt.fecha_nacimiento if dt and dt.fecha_nacimiento else '' }}">
+    </div>
+
+    <div>
+        <label>Nacionalidad</label>
+        <input type="text" name="nacionalidad" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ dt.nacionalidad if dt else '' }}" required>
+    </div>
+
+    <div>
+        <label>Ciudad</label>
+        <input type="text" name="ciudad" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ dt.ciudad if dt else '' }}" required>
+    </div>
+
+    <div>
+        <label>Equipo</label>
+        <select name="equipo_id" class="w-full p-2 bg-gray-800 rounded">
+            <option value="">Sin equipo</option>
+            {% for e in equipos %}
+            <option value="{{ e.id }}"
+                {% if dt and dt.equipo_id == e.id %}selected{% endif %}>
+                {{ e.nombre }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div>
+        <label>Temporadas</label>
+        <input type="number" name="temporadas" min="0" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ dt.temporadas if dt else '' }}" required>
+    </div>
+
+    <div class="md:col-span-2">
+        <label>Foto (URL)</label>
+        <input type="text" name="foto" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ dt.foto if dt else '' }}">
+    </div>
+
+    <div class="md:col-span-2 flex justify-end mt-6">
+        <button class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded text-white font-semibold">
+            {% if dt %}Guardar cambios{% else %}Crear DT{% endif %}
+        </button>
+    </div>
+
+</form>
+
+{% endblock %}

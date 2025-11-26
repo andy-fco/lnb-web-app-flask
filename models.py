@@ -4,42 +4,34 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
-# =====================================================
-#  USER (Agrupa administradores + aficionados)
-# =====================================================
+#--------USUARIOS------------
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
-    role = db.Column(db.String(20), default="aficionado")   # admin | aficionado
+    role = db.Column(db.String(20), default="aficionado")   
 
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     mail = db.Column(db.String(200), unique=True, nullable=False)
 
-    # Datos personales
     nombre = db.Column(db.String(20))
     apellido = db.Column(db.String(30))
     fecha_nacimiento = db.Column(db.Date)
     puntos = db.Column(db.Integer, default=0)
 
-    # Perfil
     foto_perfil = db.Column(db.String(300))
 
-    # Favoritos
-    equipo_favorito_id = db.Column(db.Integer, db.ForeignKey("equipos.id"))
-    jugador_favorito_id = db.Column(db.Integer, db.ForeignKey("jugadores.id"))
+    equipo_favorito_id = db.Column(db.Integer, db.ForeignKey("equipos.id", ondelete="SET NULL"), nullable=True)
+    jugador_favorito_id = db.Column(db.Integer, db.ForeignKey("jugadores.id", ondelete="SET NULL"), nullable=True)
 
     equipo_favorito = db.relationship("Equipo", foreign_keys=[equipo_favorito_id])
     jugador_favorito = db.relationship("Jugador", foreign_keys=[jugador_favorito_id])
 
-    # Quinteto ideal (N*M)
     quinteto = db.relationship("AficionadoJugador", back_populates="aficionado")
 
 
-# =====================================================
-#  EQUIPOS
-# =====================================================
+#--------EQUIPOS------------
 class Equipo(db.Model):
     __tablename__ = "equipos"
 
@@ -58,9 +50,7 @@ class Equipo(db.Model):
     dts = db.relationship("DT", back_populates="equipo_rel")
 
 
-# =====================================================
-#  DIRECTORES TÉCNICOS
-# =====================================================
+#--------DDTS------------
 class DT(db.Model):
     __tablename__ = "dts"
 
@@ -71,7 +61,7 @@ class DT(db.Model):
     nacionalidad = db.Column(db.String(30))
     ciudad = db.Column(db.String(50))
 
-    equipo_id = db.Column(db.Integer, db.ForeignKey("equipos.id"))
+    equipo_id = db.Column(db.Integer, db.ForeignKey("equipos.id", ondelete="SET NULL"), nullable=True)
     temporadas = db.Column(db.Integer)
 
     foto = db.Column(db.String(300))
@@ -79,9 +69,7 @@ class DT(db.Model):
     equipo_rel = db.relationship("Equipo", back_populates="dts")
 
 
-# =====================================================
-#  JUGADORES (Incluye cartas creadas por usuarios)
-# =====================================================
+#--------JUGADORES------------
 class Jugador(db.Model):
     __tablename__ = "jugadores"
 
@@ -93,10 +81,10 @@ class Jugador(db.Model):
     posicion = db.Column(db.String(15))
     nacionalidad = db.Column(db.String(30))
 
-    equipo_id = db.Column(db.Integer, db.ForeignKey("equipos.id"))
+    equipo_id = db.Column(db.Integer, db.ForeignKey("equipos.id", ondelete="SET NULL"), nullable=True)
     equipo_rel = db.relationship("Equipo", back_populates="jugadores")
 
-    # Stats
+    
     tiro = db.Column(db.Integer)
     dribling = db.Column(db.Integer)
     velocidad = db.Column(db.Integer)
@@ -104,7 +92,7 @@ class Jugador(db.Model):
     defensa = db.Column(db.Integer)
     salto = db.Column(db.Integer)
 
-    # Datos extra
+     
     fecha_nacimiento = db.Column(db.Date)
     ciudad = db.Column(db.String(50))
     altura = db.Column(db.Float)
@@ -112,32 +100,28 @@ class Jugador(db.Model):
     especialidad = db.Column(db.String(30))
     jugada = db.Column(db.String(30))
 
-    # Si este jugador pertenece a la carta de un aficionado:
-    aficionado_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+     
+    aficionado_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
 
     foto_carnet = db.Column(db.String(300))
     media_day = db.Column(db.String(300))
     foto_juego = db.Column(db.String(300))
 
 
-# =====================================================
-#  QUINTETO IDEAL
-# =====================================================
+#--------QUINTETOS------------
 class AficionadoJugador(db.Model):
     __tablename__ = "aficionado_jugador"
 
     id = db.Column(db.Integer, primary_key=True)
 
-    aficionado_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    jugador_id = db.Column(db.Integer, db.ForeignKey("jugadores.id"))
+    aficionado_id = db.Column(db.Integer, db.ForeignKey("users.id",ondelete="SET NULL"), nullable=True)
+    jugador_id = db.Column(db.Integer, db.ForeignKey("jugadores.id", ondelete="SET NULL"), nullable=True)
 
     aficionado = db.relationship("User", back_populates="quinteto")
     jugador = db.relationship("Jugador")
 
 
-# =====================================================
-#  ARTÍCULOS
-# =====================================================
+#--------ARTICULOS------------
 class Articulo(db.Model):
     __tablename__ = "articulos"
 
@@ -152,9 +136,7 @@ class Articulo(db.Model):
     foto_3 = db.Column(db.String(300))
 
 
-# =====================================================
-#  EVENTOS
-# =====================================================
+#--------EVENTOS------------
 class Evento(db.Model):
     __tablename__ = "eventos"
 
@@ -170,16 +152,14 @@ class Evento(db.Model):
     inscriptos = db.relationship("EventoAficionado", back_populates="evento")
 
 
-# =====================================================
-#  INSCRIPCIÓN A EVENTOS
-# =====================================================
+
 class EventoAficionado(db.Model):
     __tablename__ = "evento_aficionado"
 
     id = db.Column(db.Integer, primary_key=True)
 
-    evento_id = db.Column(db.Integer, db.ForeignKey("eventos.id"))
-    aficionado_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    evento_id = db.Column(db.Integer, db.ForeignKey("eventos.id", ondelete="CASCADE"))
+    aficionado_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
 
     evento = db.relationship("Evento", back_populates="inscriptos")
     aficionado = db.relationship("User")

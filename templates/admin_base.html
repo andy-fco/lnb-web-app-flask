@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{% block title %}Admin — LNB{% endblock %}</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primario: "#0a0a0a",
+              secundario: "#1a1a1a",
+              acento: "#dc2626",
+              texto: "#e5e5e5",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="bg-primario text-texto min-h-screen">
+    <nav class="w-full bg-secundario border-b border-gray-700 shadow-lg">
+      <div
+        class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between"
+      >
+        <a
+          href="{{ url_for('admin_dashboard') }}"
+          class="flex items-center gap-3"
+        >
+          <img
+            src="{{ url_for('static', filename='img/Logo_LNB.png') }}"
+            class="h-10 w-10"
+          />
+          <span class="text-xl font-bold tracking-wide">Panel Admin</span>
+        </a>
+
+        <a
+          href="{{ url_for('logout') }}"
+          class="px-4 py-1 bg-acento text-black rounded font-semibold hover:bg-red-700 transition"
+        >
+          Salir
+        </a>
+      </div>
+    </nav>
+
+    <main class="px-6 py-8 max-w-6xl mx-auto">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

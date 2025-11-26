@@ -1,0 +1,62 @@
+{% extends "admin_base.html" %} {% block title %}DTs{% endblock %} {% block
+content %}
+<h1 class="text-3xl font-bold mb-6">Directores Técnicos</h1>
+
+<form method="get" class="mb-4">
+  <input
+    type="text"
+    name="q"
+    placeholder="Buscar por nombre..."
+    value="{{ q }}"
+    class="px-3 py-2 rounded bg-gray-800 border border-gray-700"
+  />
+  <button
+    class="px-4 py-2 bg-acento text-black rounded ml-2 hover:bg-red-700 transition"
+  >
+    Buscar
+  </button>
+</form>
+<a
+  href="{{ url_for('admin_dts_crear') }}"
+  class="px-4 py-2 bg-red-600 rounded text-black font-semibold hover:bg-red-700 transition inline-block mb-4"
+>
+  + Crear nuevo DT
+</a>
+
+<div class="space-y-3">
+  {% for dt in dts %}
+  <div
+    class="flex justify-between items-center bg-secundario border border-gray-700 p-4 rounded-lg"
+  >
+    <div>
+      <p class="text-lg font-semibold">{{ dt.nombre }} {{ dt.apellido }}</p>
+      <p class="text-gray-400 text-sm">
+        {{ dt.nacionalidad }} • {{ dt.ciudad }}
+      </p>
+
+      {% if dt.equipo_rel %}
+      <p class="text-gray-500 text-xs">Equipo: {{ dt.equipo_rel.nombre }}</p>
+      {% endif %}
+    </div>
+
+    <div class="flex gap-3">
+      <a
+        href="{{ url_for('admin_dts_editar', id=dt.id) }}"
+        class="px-3 py-1 bg-blue-600 text-black rounded hover:bg-blue-700"
+      >
+        Editar
+      </a>
+
+      <a
+        href="{{ url_for('admin_dts_eliminar', id=dt.id) }}"
+        onclick="return confirm('¿Eliminar DT definitivamente?');"
+        class="px-3 py-1 bg-red-600 text-black rounded hover:bg-red-700"
+      >
+        Eliminar
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

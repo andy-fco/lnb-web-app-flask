@@ -1,0 +1,65 @@
+{% extends "admin_base.html" %} {% block title %}Usuarios - Admin{% endblock %}
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">Gestión de Usuarios</h1>
+
+<form
+  method="get"
+  action="{{ url_for('admin_usuarios') }}"
+  class="mb-6 flex gap-3"
+>
+  <input
+    type="text"
+    name="q"
+    value="{{ q }}"
+    placeholder="Buscar por nombre o mail..."
+    class="px-4 py-2 rounded bg-secundario border border-gray-700 w-72"
+  />
+  <button class="px-4 py-2 bg-acento text-black rounded hover:bg-red-700">
+    Buscar
+  </button>
+</form>
+
+<a
+  href="{{ url_for('admin_usuario_crear') }}"
+  class="px-4 py-2 bg-red-600 rounded text-black font-semibold hover:bg-red-700 transition inline-block mb-4"
+>
+  + Crear nuevo usuario
+</a>
+
+<div class="flex flex-col gap-3">
+  {% for u in usuarios %}
+  <div
+    class="bg-secundario border border-gray-700 rounded-lg p-4 flex items-center justify-between"
+  >
+    <div>
+      <p class="text-lg font-semibold">{{ u.username }}</p>
+      <p class="text-gray-400 text-sm">{{ u.mail }}</p>
+
+      <p class="text-sm mt-1">
+        Rol:
+        <span class="font-semibold text-red-400">{{ u.role }}</span>
+      </p>
+    </div>
+
+    <div class="flex gap-3">
+      <a
+        href="{{ url_for('admin_usuario_editar', id=u.id) }}"
+        class="px-3 py-1 bg-blue-600 text-black rounded hover:bg-blue-700"
+      >
+        Editar
+      </a>
+
+      <a
+        href="{{ url_for('admin_usuario_eliminar', id=u.id) }}"
+        class="px-3 py-1 bg-red-600 text-black rounded hover:bg-red-700"
+        onclick="return confirm('¿Eliminar usuario?');"
+      >
+        Eliminar
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

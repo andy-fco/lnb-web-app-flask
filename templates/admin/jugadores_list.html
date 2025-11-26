@@ -1,0 +1,62 @@
+{% extends "admin_base.html" %} {% block title %}Jugadores - Admin{% endblock %}
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">Jugadores</h1>
+
+<form method="get" class="mb-4">
+  <input
+    type="text"
+    name="q"
+    placeholder="Buscar por nombre..."
+    value="{{ q }}"
+    class="px-3 py-2 rounded bg-gray-800 border border-gray-700"
+  />
+  <button
+    class="px-4 py-2 bg-acento text-black rounded ml-2 hover:bg-red-700 transition"
+  >
+    Buscar
+  </button>
+</form>
+
+<a
+  href="{{ url_for('admin_jugador_crear') }}"
+  class="px-4 py-2 bg-red-600 rounded text-black font-semibold hover:bg-red-700 transition inline-block mb-4"
+>
+  + Crear nuevo jugador
+</a>
+
+<div class="space-y-3">
+  {% for j in jugadores %}
+  <div
+    class="bg-secundario border border-gray-700 rounded-xl p-4 flex items-center justify-between"
+  >
+    <div>
+      <p class="font-bold text-lg">{{ j.nombre }} {{ j.apellido }}</p>
+      <p class="text-gray-400 text-sm">
+        {{ j.posicion }} • {{ j.nacionalidad }}
+      </p>
+      <p class="text-gray-500 text-sm">
+        Equipo: {{ j.equipo_rel.nombre if j.equipo_rel else "Sin equipo" }}
+      </p>
+    </div>
+
+    <div class="flex gap-3">
+      <a
+        href="{{ url_for('admin_jugador_editar', id=j.id) }}"
+        class="px-3 py-1 bg-blue-600 text-black rounded hover:bg-blue-700"
+      >
+        Editar
+      </a>
+
+      <a
+        href="{{ url_for('admin_jugador_eliminar', id=j.id) }}"
+        class="px-3 py-1 bg-red-600 text-black rounded hover:bg-red-700"
+      >
+        Eliminar
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

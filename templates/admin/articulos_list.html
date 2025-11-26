@@ -1,0 +1,54 @@
+{% extends "admin_base.html" %} {% block title %}Artículos{% endblock %} {%
+block content %}
+<h1 class="text-3xl font-bold mb-6">Artículos</h1>
+
+<form method="GET" class="mb-4">
+  <input
+    type="text"
+    name="q"
+    value="{{ q }}"
+    placeholder="Buscar artículo..."
+    class="w-full md:w-1/3 p-2 bg-gray-800 rounded border border-gray-700"
+  />
+  <button class="px-4 py-2 bg-acento text-black rounded hover:bg-red-700">
+    Buscar
+  </button>
+</form>
+
+<a
+  href="{{ url_for('admin_articulos_crear') }}"
+  class="px-4 py-2 bg-red-600 rounded text-black font-semibold hover:bg-red-700 transition inline-block mb-4"
+>
+  + Crear nuevo artículo
+</a>
+
+<div class="space-y-3">
+  {% for a in articulos %}
+  <div
+    class="flex justify-between items-center bg-secundario border border-gray-700 p-4 rounded-lg"
+  >
+    <div>
+      <p class="text-lg font-semibold">{{ a.titulo }}</p>
+      <p class="text-gray-400 text-sm">
+        {{ a.fecha.strftime('%d/%m/%Y') if a.fecha else '' }}
+      </p>
+    </div>
+
+    <div class="flex gap-3">
+      <a
+        href="{{ url_for('admin_articulos_editar', id=a.id) }}"
+        class="px-3 py-1 bg-blue-600 text-black rounded hover:bg-blue-700"
+        >Editar</a
+      >
+
+      <a
+        href="{{ url_for('admin_articulos_eliminar', id=a.id) }}"
+        onclick="return confirm('¿Eliminar artículo?');"
+        class="px-3 py-1 bg-red-600 text-black rounded hover:bg-red-700"
+        >Eliminar</a
+      >
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "admin_base.html" %} {% block title %}Artículos{% endblock %} {%
+block content %}
+<h1 class="text-3xl font-bold mb-6">
+  {% if articulo %}Editar artículo{% else %}Crear artículo{% endif %}
+</h1>
+
+<form method="POST" class="space-y-5">
+  <div>
+    <label>Título</label>
+    <input
+      type="text"
+      name="titulo"
+      required
+      value="{{ articulo.titulo if articulo else '' }}"
+      class="w-full p-2 bg-gray-800 rounded border border-gray-700"
+    />
+  </div>
+
+  <div>
+    <label>Descripción</label>
+    <textarea
+      name="descripcion"
+      required
+      rows="6"
+      class="w-full p-2 bg-gray-800 rounded border border-gray-700"
+    >
+{{ articulo.descripcion if articulo else '' }}</textarea
+    >
+  </div>
+
+  <!-- FECHA YA NO APARECE AQUÍ -->
+
+  <div>
+    <label>URL Portada</label>
+    <input
+      type="text"
+      name="portada"
+      value="{{ articulo.portada if articulo else '' }}"
+      class="w-full p-2 bg-gray-800 rounded border border-gray-700"
+    />
+  </div>
+
+  <div>
+    <label>Foto 1</label>
+    <input
+      type="text"
+      name="foto_1"
+      value="{{ articulo.foto_1 if articulo else '' }}"
+      class="w-full p-2 bg-gray-800 rounded border border-gray-700"
+    />
+  </div>
+
+  <div>
+    <label>Foto 2</label>
+    <input
+      type="text"
+      name="foto_2"
+      value="{{ articulo.foto_2 if articulo else '' }}"
+      class="w-full p-2 bg-gray-800 rounded border border-gray-700"
+    />
+  </div>
+
+  <div>
+    <label>Foto 3</label>
+    <input
+      type="text"
+      name="foto_3"
+      value="{{ articulo.foto_3 if articulo else '' }}"
+      class="w-full p-2 bg-gray-800 rounded border border-gray-700"
+    />
+  </div>
+
+  <button class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-white">
+    Guardar
+  </button>
+</form>
+{% endblock %}

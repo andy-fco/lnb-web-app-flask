@@ -1,55 +1,179 @@
 {% extends "base.html" %} {% block title %}Inicio{% endblock %} {% block content
 %}
 
-<h1 class="text-3xl font-bold mb-6">
-  Bienvenido al sitio de la Liga Nacional de Básquet
-</h1>
+<h1 class="text-3xl font-bold mb-6">Últimas Noticias</h1>
 
-<div id="index-news" class="mb-10">
-  <h2 class="text-2xl font-semibold mb-4">Últimas novedades</h2>
-
-  {% if error %}
-  <div class="bg-yellow-200 text-yellow-800 px-4 py-2 mb-4 rounded">
-    {{ error }}
-  </div>
-  {% endif %} {% if articles %}
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    {% for a in articles %}
-    <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
-      {% if a.image %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+  <div
+    class="lg:col-span-2 bg-secundario rounded-xl p-4 border border-gray-700"
+  >
+    {% if articulos %} {% set art = articulos[0] %}
+    <a href="{{ url_for('noticia_detalle', id=art.id) }}">
       <img
-        src="{{ a.image }}"
-        alt="imagen noticia"
-        class="w-full h-48 object-cover"
+        src="{{ url_for('static', filename=art.portada or 'img/placeholder_noticia.jpg') }}"
+        class="w-full h-72 object-cover rounded mb-4"
       />
-      {% endif %}
+      <h2 class="text-xl font-bold">{{ art.titulo }}</h2>
+      <p class="text-gray-400 mt-2">{{ art.descripcion[:200] }}...</p>
+    </a>
+    {% else %}
+    <p class="text-gray-500">No hay noticias disponibles.</p>
+    {% endif %}
+  </div>
 
-      <div class="p-4 flex flex-col flex-grow">
-        <h5 class="text-lg font-bold mb-2">{{ a.title }}</h5>
-        <p class="text-sm text-gray-600 flex-grow">{{ a.description or '' }}</p>
-
-        {% if a.source %}
-        <p class="text-xs text-gray-500 mt-3">{{ a.source['name'] }}</p>
-        {% endif %}
+  <div class="space-y-4">
+    {% for art in articulos[1:] %}
+    <a
+      href="{{ url_for('noticia_detalle', id=art.id) }}"
+      class="flex gap-3 bg-secundario p-3 rounded-lg border border-gray-700 hover:bg-gray-800 transition"
+    >
+      <div class="w-32 h-20 bg-gray-800 rounded overflow-hidden">
+        <img
+          src="{{ url_for('static', filename=art.portada or 'img/placeholder_noticia.jpg') }}"
+          class="w-full h-full object-cover"
+        />
       </div>
 
-      {% if a.url %}
-      <div class="p-4 border-t">
-        <a
-          href="{{ a.url }}"
-          target="_blank"
-          class="inline-block bg-acento text-black font-semibold px-3 py-1 rounded hover:opacity-90"
-        >
-          Leer completo
-        </a>
+      <div class="flex-1">
+        <p class="font-semibold">{{ art.titulo }}</p>
+        <p class="text-gray-500 text-sm">{{ art.descripcion[:70] }}...</p>
       </div>
-      {% endif %}
-    </div>
+    </a>
     {% endfor %}
   </div>
-  {% else %}
-  <p class="text-gray-600">No hay noticias disponibles.</p>
+</div>
+
+<h2 class="text-2xl font-bold mb-4">Jugadores Destacados</h2>
+
+<div class="flex justify-center">
+  <div
+    id="carrusel"
+    class="flex overflow-x-auto gap-8 py-4 scroll-smooth px-4"
+    style="max-width: 100%"
+  >
+    {% for jugador in jugadores %}
+    <a
+      href="{{ url_for('jugador_detalle', id=jugador.id) }}"
+      class="min-w-[260px] bg-secundario border border-gray-700 rounded-2xl p-6 flex flex-col items-center hover:bg-gray-800 hover:scale-[1.05] transition shadow-lg"
+    >
+      <!-- Foto -->
+      <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-700 mb-4">
+        <img
+          src="{{ url_for('static', filename=jugador.foto_carnet or 'img/placeholder_jugador.png') }}"
+          class="w-full h-full object-cover"
+        />
+      </div>
+
+      <!-- Nombre -->
+      <h3 class="text-xl font-semibold text-center">
+        {{ jugador.nombre }} {{ jugador.apellido }}
+      </h3>
+
+      <!-- Equipo -->
+      {% if jugador.equipo_rel %}
+      <p class="text-gray-300 text-sm mt-1">{{ jugador.equipo_rel.nombre }}</p>
+      {% else %}
+      <p class="text-gray-500 text-sm mt-1">Sin equipo</p>
+      {% endif %}
+
+      <!-- Posición -->
+      <p class="text-gray-400 text-sm mt-1">{{ jugador.posicion }}</p>
+
+      <!-- Media -->
+      <p class="text-red-400 font-bold mt-2 text-lg">
+        Media: {{ jugador.media }}
+      </p>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<!--<h2 class="text-2xl font-bold mb-4">Básquet Mundial</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+  {% if mundial %} {% for m in mundial %}
+  <a
+    href="{{ m.url }}"
+    target="_blank"
+    class="bg-secundario rounded-xl border border-gray-700 p-4 hover:bg-gray-800 transition block"
+  >
+    <img
+      src="{{ m.image or url_for('static', filename='img/placeholder_noticia.jpg') }}"
+      class="w-full h-40 object-cover rounded mb-3"
+    />
+    <h3 class="font-semibold">{{ m.title }}</h3>
+    <p class="text-gray-400 text-sm mt-1">{{ m.descripcion[:90] }}...</p>
+  </a>
+  {% endfor %} {% else %}
+  <p class="text-gray-500 col-span-3">
+    No se pudieron cargar noticias internacionales.
+  </p>
   {% endif %}
+</div>-->
+
+<h2 class="text-2xl font-bold mb-4">Evento Destacado</h2>
+
+{% if evento_dest %}
+<div
+  class="bg-secundario grid grid-cols-1 md:grid-cols-2 rounded-xl border border-gray-700 mb-12"
+>
+  <div class="p-6 flex flex-col justify-between">
+    <div>
+      <h3 class="text-xl font-bold">{{ evento_dest.titulo }}</h3>
+      <p class="text-gray-400 mt-2">{{ evento_dest.descripcion[:200] }}...</p>
+    </div>
+
+    <div class="mt-6 space-y-2">
+      <p>
+        <span class="font-semibold">¿Dónde?</span> {{ evento_dest.foto_1 or
+        'Ubicación próximamente' }}
+      </p>
+      <p>
+        <span class="font-semibold">¿Cuándo?</span>
+        {{ evento_dest.fecha_y_hora.strftime('%d/%m/%Y %H:%M') }}
+      </p>
+    </div>
+
+    <a
+      href="{{ url_for('evento_detalle', id=evento_dest.id) }}"
+      class="mt-6 inline-block bg-acento text-black px-4 py-2 rounded shadow hover:bg-red-700 transition"
+    >
+      Ver Evento
+    </a>
+  </div>
+
+  <div class="bg-gray-800 h-64 md:h-full rounded-r-xl">
+    <img
+      src="{{ url_for('static', filename=evento_dest.portada or 'img/placeholder_evento.jpg') }}"
+      class="w-full h-full object-cover rounded-r-xl"
+    />
+  </div>
+</div>
+
+{% else %}
+<p class="text-gray-400 mb-12">No hay eventos próximos.</p>
+{% endif %}
+
+<h2 class="text-2xl font-bold mb-4">¡Divertite un rato!</h2>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+  <!-- placeholder -->
+  {% for i in [1,2,3] %}
+  <div class="bg-secundario p-4 rounded-xl border border-gray-700 shadow">
+    <div class="w-full h-40 bg-gray-800 rounded mb-3"></div>
+    <p class="font-semibold">Juego #{{ i }}</p>
+    <p class="text-gray-400 text-sm">Jugá y ganá puntos para tu jugador.</p>
+  </div>
+  {% endfor %}
+</div>
+
+<h2 class="text-2xl font-bold mb-4">Seguinos en redes</h2>
+
+<div class="flex gap-8 text-4xl mb-20">
+  <i class="fab fa-facebook"></i>
+  <i class="fab fa-instagram"></i>
+  <i class="fab fa-youtube"></i>
+  <i class="fab fa-linkedin"></i>
 </div>
 
 {% endblock %}

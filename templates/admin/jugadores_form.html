@@ -1,0 +1,201 @@
+{% extends "admin_base.html" %}
+{% block title %}
+    {% if jugador %}Editar jugador{% else %}Crear jugador{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">
+    {% if jugador %}Editar jugador{% else %}Crear jugador{% endif %}
+</h1>
+
+<form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- NOMBRE -->
+    <div>
+        <label>Nombre</label>
+        <input type="text" name="nombre" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.nombre if jugador else '' }}" required>
+    </div>
+
+    <!-- APELLIDO -->
+    <div>
+        <label>Apellido</label>
+        <input type="text" name="apellido" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.apellido if jugador else '' }}" required>
+    </div>
+
+    <!-- CAMISETA -->
+    <div>
+        <label>Camiseta</label>
+        <input type="number" name="camiseta" min="0" max="99" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.camiseta if jugador else '' }}" required>
+    </div>
+
+    <!-- MEDIA -->
+    <div>
+        <label>Media</label>
+        <input type="number" name="media" min="1" max="99" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.media if jugador else '' }}" required>
+    </div>
+
+    <!-- POSICIÓN -->
+    <div>
+        <label>Posición</label>
+        <select name="posicion" class="w-full p-2 bg-gray-800 rounded" required>
+            {% set posiciones = ["Base","Escolta","Alero","Ala-Pivot","Pivot"] %}
+            {% for pos in posiciones %}
+            <option value="{{pos}}"
+                {% if jugador and jugador.posicion==pos %}selected{% endif %}>
+                {{pos}}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- NACIONALIDAD -->
+    <div>
+        <label>Nacionalidad</label>
+        <input type="text" name="nacionalidad" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.nacionalidad if jugador else '' }}" required>
+    </div>
+
+    <!-- EQUIPO -->
+    <div class="md:col-span-2">
+        <label>Equipo</label>
+        <select name="equipo_id" class="w-full p-2 bg-gray-800 rounded">
+            <option value="">Sin equipo</option>
+            {% for e in equipos %}
+            <option value="{{ e.id }}"
+                {% if jugador and jugador.equipo_id==e.id %}selected{% endif %}>
+                {{ e.nombre }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- STATS -->
+    <div>
+        <label>Tiro</label>
+        <input type="number" name="tiro" min="1" max="99" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.tiro if jugador else '' }}" required>
+    </div>
+
+    <div>
+        <label>Dribling</label>
+        <input type="number" name="dribling" min="1" max="99" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.dribling if jugador else '' }}" required>
+    </div>
+
+    <div>
+        <label>Velocidad</label>
+        <input type="number" name="velocidad" min="1" max="99" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.velocidad if jugador else '' }}" required>
+    </div>
+
+    <div>
+        <label>Pase</label>
+        <input type="number" name="pase" min="1" max="99" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.pase if jugador else '' }}" required>
+    </div>
+
+    <div>
+        <label>Defensa</label>
+        <input type="number" name="defensa" min="1" max="99" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.defensa if jugador else '' }}" required>
+    </div>
+
+    <div>
+        <label>Salto</label>
+        <input type="number" name="salto" min="1" max="99" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.salto if jugador else '' }}" required>
+    </div>
+
+    <!-- FECHA NACI -->
+    <div>
+        <label>Fecha de nacimiento</label>
+        <input type="date" name="fecha_nacimiento" class="w-full p-2 bg-gray-800 rounded"
+        value="{{ jugador.fecha_nacimiento if jugador and jugador.fecha_nacimiento else '' }}">
+    </div>
+
+    <!-- CIUDAD -->
+    <div>
+        <label>Ciudad</label>
+        <input type="text" name="ciudad" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.ciudad if jugador else '' }}">
+    </div>
+
+    <!-- ALTURA -->
+    <div>
+        <label>Altura (m)</label>
+        <input type="number" name="altura" min="1.60" max="2.20" step="0.01"
+               class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.altura if jugador else '' }}">
+    </div>
+
+    <!-- MANO HÁBIL -->
+    <div>
+        <label>Mano hábil</label>
+        <select name="mano_habil" class="w-full p-2 bg-gray-800 rounded" required>
+            <option value="Derecha" {% if jugador and jugador.mano_habil=="Derecha" %}selected{% endif %}>Derecha</option>
+            <option value="Izquierda" {% if jugador and jugador.mano_habil=="Izquierda" %}selected{% endif %}>Izquierda</option>
+        </select>
+    </div>
+
+    <!-- ESPECIALIDAD -->
+    <div>
+        <label>Especialidad</label>
+        <select name="especialidad" class="w-full p-2 bg-gray-800 rounded" required>
+            {% set especialidades=["Tiro","Asistencias","Volcadas","Tapas","Uno contra uno","Defensa","Poste bajo"] %}
+            {% for esp in especialidades %}
+            <option value="{{esp}}"
+              {% if jugador and jugador.especialidad==esp %}selected{% endif %}>
+              {{esp}}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- JUGADA -->
+    <div class="md:col-span-2">
+        <label>Jugada característica</label>
+        <select name="jugada" class="w-full p-2 bg-gray-800 rounded" required>
+            {% set jugadas=["alley-oop","volcada","volcada en transición","Triple","Salida de tirador","Stepback","flotadora","gancho","cross-over","pick n roll","pick n pop","no-look pass"] %}
+            {% for jg in jugadas %}
+            <option value="{{ jg }}"
+                {% if jugador and jugador.jugada==jg %}selected{% endif %}>
+                {{ jg }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- FOTOS (STRING URL) -->
+    <div>
+        <label>Foto carnet (URL)</label>
+        <input type="text" name="foto_carnet" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.foto_carnet if jugador else '' }}">
+    </div>
+
+    <div>
+        <label>Media day (URL)</label>
+        <input type="text" name="media_day" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.media_day if jugador else '' }}">
+    </div>
+
+    <div>
+        <label>Foto juego (URL)</label>
+        <input type="text" name="foto_juego" class="w-full p-2 bg-gray-800 rounded"
+               value="{{ jugador.foto_juego if jugador else '' }}">
+    </div>
+
+    <!-- BOTÓN -->
+    <div class="md:col-span-2 flex justify-end mt-6">
+        <button class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded text-white font-semibold">
+            {% if jugador %}Guardar cambios{% else %}Crear jugador{% endif %}
+        </button>
+    </div>
+
+</form>
+
+{% endblock %}

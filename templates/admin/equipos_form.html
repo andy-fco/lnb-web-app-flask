@@ -1,0 +1,111 @@
+{% extends "admin_base.html" %} {% block title %}{{ 'Editar equipo' if equipo
+else 'Nuevo equipo' }}{% endblock %} {% block content %}
+
+<h1 class="text-3xl font-bold mb-6">
+  {{ 'Editar equipo' if equipo else 'Crear nuevo equipo' }}
+</h1>
+
+<form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <!-- Nombre -->
+  <div>
+    <label class="block mb-1 text-gray-300">Nombre</label>
+    <input
+      type="text"
+      name="nombre"
+      required
+      value="{{ equipo.nombre if equipo else '' }}"
+      class="w-full px-4 py-2 bg-secundario border border-gray-700 rounded"
+    />
+  </div>
+
+  <!-- Ciudad -->
+  <div>
+    <label class="block mb-1 text-gray-300">Ciudad</label>
+    <input
+      type="text"
+      name="ciudad"
+      required
+      value="{{ equipo.ciudad if equipo else '' }}"
+      class="w-full px-4 py-2 bg-secundario border border-gray-700 rounded"
+    />
+  </div>
+
+  <!-- Estadio -->
+  <div>
+    <label class="block mb-1 text-gray-300">Estadio</label>
+    <input
+      type="text"
+      name="estadio"
+      required
+      value="{{ equipo.estadio if equipo else '' }}"
+      class="w-full px-4 py-2 bg-secundario border border-gray-700 rounded"
+    />
+  </div>
+
+  <!-- Fecha fundación -->
+  <div>
+    <label class="block mb-1 text-gray-300">Fecha de fundación</label>
+    <input
+      type="date"
+      name="fecha"
+      value="{{ equipo.fecha_fundacion if equipo else '' }}"
+      class="w-full px-4 py-2 bg-secundario border border-gray-700 rounded"
+    />
+  </div>
+
+  <!-- Temporadas -->
+  <div>
+    <label class="block mb-1 text-gray-300">Temporadas</label>
+    <input
+      type="number"
+      name="temporadas"
+      min="0"
+      value="{{ equipo.temporadas if equipo else '' }}"
+      class="w-full px-4 py-2 bg-secundario border border-gray-700 rounded"
+    />
+  </div>
+
+  <!-- Campeonatos -->
+  <div>
+    <label class="block mb-1 text-gray-300">Campeonatos</label>
+    <input
+      type="number"
+      name="campeonatos"
+      min="0"
+      value="{{ equipo.campeonatos if equipo else '' }}"
+      class="w-full px-4 py-2 bg-secundario border border-gray-700 rounded"
+    />
+  </div>
+
+  <!-- URL escudo -->
+  <div class="md:col-span-2">
+    <label class="block mb-1 text-gray-300">URL Escudo</label>
+    <input
+      type="text"
+      name="escudo"
+      value="{{ equipo.escudo if equipo else '' }}"
+      class="w-full px-4 py-2 bg-secundario border border-gray-700 rounded"
+    />
+  </div>
+
+  <!-- URL foto estadio -->
+  <div class="md:col-span-2">
+    <label class="block mb-1 text-gray-300">URL Foto Estadio</label>
+    <input
+      type="text"
+      name="foto_estadio"
+      value="{{ equipo.foto_estadio if equipo else '' }}"
+      class="w-full px-4 py-2 bg-secundario border border-gray-700 rounded"
+    />
+  </div>
+
+  <div class="md:col-span-2 flex justify-end mt-4">
+    <button
+      class="px-6 py-2 bg-acento text-black rounded font-semibold hover:bg-red-700"
+    >
+      Guardar
+    </button>
+  </div>
+</form>
+
+{% endblock %}

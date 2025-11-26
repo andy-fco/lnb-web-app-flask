@@ -1,16 +1,25 @@
 from flask import Flask, abort, flash, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from flask_bcrypt import Bcrypt
 from flask_login import (
     LoginManager, UserMixin, login_user,
     logout_user, login_required, current_user
 )
+from datetime import datetime
 import requests
 
 from models import (
     db, User, Equipo, Jugador, Articulo, Evento,
     EventoAficionado, AficionadoJugador, DT
 )
+
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 def normalizar_posicion(pos):
     pos = pos.lower()
@@ -52,20 +61,26 @@ def load_user(user_id):
 
 #------------ RUTAS ---------------
 
+#USER-----------------------------------
+
 @app.route("/")
 def index():
-    try:
-        gnews_api_key = "b6e169c2ada7c7fba93403ff919b77f9"
-        url = f"https://gnews.io/api/v4/search?q=basquet&lang=es&country=ar&max=6&apikey={gnews_api_key}"
-        r = requests.get(url, timeout=6)
-        r.raise_for_status()
-        data = r.json()
-        articles = data.get("articles", [])
-    except Exception as e:
-        articles = []
-        error = f"Error obteniendo noticias: {e}"
-        return render_template("index.html", articles=articles, error=error)
-    return render_template("index.html", articles=articles, error=None)
+    articulos = Articulo.query.order_by(Articulo.fecha.desc()).limit(4).all()
+    evento_dest = Evento.query.order_by(Evento.fecha_y_hora.asc()).first()
+    jugadores = Jugador.query.filter(Jugador.aficionado_id.is_(None)).order_by(Jugador.media.desc()).limit(3).all()
+
+
+    return render_template(
+        "index.html",
+        articulos=articulos,
+        evento_dest=evento_dest,
+        jugadores=jugadores
+    )
+
+
+
+
+
 
 #EQUIPOS 
 @app.route("/equipos")
@@ -450,15 +465,651 @@ def login():
 
         if user and bcrypt.check_password_hash(user.password, password):
             login_user(user)
-            return redirect(url_for("index"))
-        else:
-            flash("Credenciales inválidas", "danger")
-            return redirect(url_for("login"))
+
+           
+            if user.role == "admin":
+                return redirect(url_for("admin_dashboard"))
+            else:
+                return redirect(url_for("index"))
+
+        flash("Credenciales inválidas", "danger")
+        return redirect(url_for("login"))
 
     return render_template("login.html")
 
 
+#ADMIN---------------------------------------
 
+@app.route("/admin")
+@login_required
+def admin_dashboard():
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+    return render_template("admin/dashboard.html")
+
+
+#USUARIOS
+@app.route("/admin/usuarios")
+@login_required
+def admin_usuarios():
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    q = request.args.get("q", "").strip()
+
+    if q:
+        usuarios = User.query.filter(
+            (User.username.ilike(f"%{q}%")) |
+            (User.mail.ilike(f"%{q}%"))
+        ).all()
+    else:
+        usuarios = User.query.all()
+
+    return render_template("admin/usuarios_list.html", usuarios=usuarios, q=q)
+
+#crear
+@app.route("/admin/usuarios/crear", methods=["GET", "POST"])
+@login_required
+def admin_usuario_crear():
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+        username = request.form["username"]
+        mail = request.form["mail"]
+        password = request.form["password"]
+        role = request.form["role"]
+
+        hashed = bcrypt.generate_password_hash(password).decode("utf-8")
+
+        nuevo = User(
+            username=username,
+            mail=mail,
+            password=hashed,
+            role=role
+        )
+        db.session.add(nuevo)
+        db.session.commit()
+
+        return redirect(url_for("admin_usuarios"))
+
+    return render_template("admin/usuario_form.html", modo="crear", usuario=None)
+
+
+#editar
+@app.route("/admin/usuarios/editar/<int:id>", methods=["GET", "POST"])
+@login_required
+def admin_usuario_editar(id):
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    usuario = User.query.get_or_404(id)
+
+    if request.method == "POST":
+        usuario.username = request.form["username"]
+        usuario.mail = request.form["mail"]
+        usuario.role = request.form["role"]
+
+        nueva_pass = request.form.get("password")
+        if nueva_pass:
+            usuario.password = bcrypt.generate_password_hash(nueva_pass).decode("utf-8")
+
+        db.session.commit()
+        return redirect(url_for("admin_usuarios"))
+
+    return render_template("admin/usuario_form.html", modo="editar", usuario=usuario)
+
+#eliminar
+@app.route("/admin/usuarios/eliminar/<int:id>")
+@login_required
+def admin_usuario_eliminar(id):
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    usuario = User.query.get_or_404(id)
+    db.session.delete(usuario)
+    db.session.commit()
+
+    return redirect(url_for("admin_usuarios"))
+
+
+#EQUIPOS
+@app.route("/admin/equipos")
+@login_required
+def admin_equipos():
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    q = request.args.get("q", "")
+
+    if q:
+        equipos = Equipo.query.filter(
+            (Equipo.nombre.ilike(f"%{q}%")) |
+            (Equipo.ciudad.ilike(f"%{q}%"))
+        ).all()
+    else:
+        equipos = Equipo.query.all()
+
+    return render_template("admin/equipos_list.html",
+                           equipos=equipos, q=q)
+
+#crear
+@app.route("/admin/equipos/crear", methods=["GET", "POST"])
+@login_required
+def admin_equipo_crear():
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+
+        fecha_str = request.form["fecha"]  
+        fecha = None
+
+        if fecha_str:
+            fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+
+        e = Equipo(
+            nombre=request.form["nombre"],
+            ciudad=request.form["ciudad"],
+            estadio=request.form["estadio"],
+            fecha_fundacion=fecha,
+            temporadas=request.form["temporadas"] or 0,
+            campeonatos=request.form["campeonatos"] or 0,
+            escudo=request.form["escudo"] or None,
+            foto_estadio=request.form["foto_estadio"] or None
+        )
+
+        db.session.add(e)
+        db.session.commit()
+
+        flash("Equipo creado correctamente.", "success")
+        return redirect(url_for("admin_equipos"))
+
+    return render_template("admin/equipos_form.html", equipo=None)
+
+#editar
+@app.route("/admin/equipos/<int:id>/editar", methods=["GET", "POST"])
+@login_required
+def admin_equipo_editar(id):
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    equipo = Equipo.query.get_or_404(id)
+
+    if request.method == "POST":
+  
+        fecha_str = request.form.get("fecha", "")
+        fecha = None
+
+        if fecha_str:
+            fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+ 
+        equipo.nombre = request.form["nombre"]
+        equipo.ciudad = request.form["ciudad"]
+        equipo.estadio = request.form["estadio"]
+        equipo.fecha_fundacion = fecha
+        equipo.temporadas = request.form["temporadas"] or 0
+        equipo.campeonatos = request.form["campeonatos"] or 0
+        equipo.escudo = request.form["escudo"] or None
+        equipo.foto_estadio = request.form["foto_estadio"] or None
+
+        db.session.commit()
+        flash("Equipo actualizado correctamente.", "success")
+        return redirect(url_for("admin_equipos"))
+ 
+    return render_template("admin/equipos_form.html", equipo=equipo)
+
+
+#eliminar
+@app.route("/admin/equipos/<int:id>/eliminar")
+@login_required
+def admin_equipo_eliminar(id):
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    equipo = Equipo.query.get_or_404(id)
+
+    db.session.delete(equipo)
+    db.session.commit()
+
+    flash("Equipo eliminado correctamente.", "success")
+    return redirect(url_for("admin_equipos"))
+
+
+#JUGADORES---------------------------------
+@app.route("/admin/jugadores")
+@login_required
+def admin_jugadores():
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    q = request.args.get("q", "")
+
+    jugadores = Jugador.query.filter(
+        Jugador.aficionado_id.is_(None),
+        (Jugador.nombre.ilike(f"%{q}%")) | (Jugador.apellido.ilike(f"%{q}%"))
+    ).order_by(Jugador.apellido.asc()).all()
+
+    return render_template("admin/jugadores_list.html",
+                           jugadores=jugadores,
+                           q=q)
+
+#crear
+from datetime import datetime
+
+@app.route("/admin/jugadores/crear", methods=["GET", "POST"])
+@login_required
+def admin_jugador_crear():
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    equipos = Equipo.query.order_by(Equipo.nombre.asc()).all()
+
+    if request.method == "POST":
+
+         
+        fecha_str = request.form.get("fecha_nacimiento")
+        fecha_nac = None
+        if fecha_str:
+            try:
+                fecha_nac = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+            except:
+                fecha_nac = None   
+
+        equipo_id = request.form.get("equipo_id") or None
+
+        j = Jugador(
+            nombre=request.form["nombre"],
+            apellido=request.form["apellido"],
+            camiseta=int(request.form["camiseta"] or 0),
+            media=int(request.form["media"] or 0),
+            posicion=request.form["posicion"],
+            nacionalidad=request.form["nacionalidad"],
+            equipo_id=equipo_id,
+
+            tiro=int(request.form["tiro"] or 0),
+            dribling=int(request.form["dribling"] or 0),
+            velocidad=int(request.form["velocidad"] or 0),
+            pase=int(request.form["pase"] or 0),
+            defensa=int(request.form["defensa"] or 0),
+            salto=int(request.form["salto"] or 0),
+
+            fecha_nacimiento=fecha_nac,
+            ciudad=request.form["ciudad"] or None,
+            altura=float(request.form["altura"] or 0) if request.form["altura"] else None,
+            mano_habil=request.form["mano_habil"] or None,
+            especialidad=request.form["especialidad"] or None,
+            jugada=request.form["jugada"] or None,
+
+            aficionado_id=None,
+            foto_carnet=request.form["foto_carnet"] or None,
+            media_day=request.form["media_day"] or None,
+            foto_juego=request.form["foto_juego"] or None,
+        )
+
+        db.session.add(j)
+        db.session.commit()
+
+        flash("Jugador creado correctamente.", "success")
+        return redirect(url_for("admin_jugadores"))
+
+    return render_template("admin/jugadores_form.html",
+                           jugador=None,
+                           equipos=equipos)
+
+#editar
+@app.route("/admin/jugadores/<int:id>/editar", methods=["GET", "POST"])
+@login_required
+def admin_jugador_editar(id):
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    jugador = Jugador.query.get_or_404(id)
+
+    if jugador.aficionado_id is not None:
+        flash("No podés editar jugadores creados por usuarios.", "danger")
+        return redirect(url_for("admin_jugadores"))
+
+    equipos = Equipo.query.order_by(Equipo.nombre.asc()).all()
+
+    if request.method == "POST":
+
+        
+        fecha_str = request.form.get("fecha_nacimiento")
+        fecha_nac = None
+        if fecha_str:
+            try:
+                fecha_nac = datetime.strptime(fecha_str, "%Y-%m-%d").date()
+            except:
+                fecha_nac = None
+
+        equipo_id = request.form.get("equipo_id") or None
+
+        jugador.nombre = request.form["nombre"]
+        jugador.apellido = request.form["apellido"]
+        jugador.camiseta = int(request.form["camiseta"] or 0)
+        jugador.media = int(request.form["media"] or 0)
+        jugador.posicion = request.form["posicion"]
+        jugador.nacionalidad = request.form["nacionalidad"]
+        jugador.equipo_id = equipo_id
+
+        jugador.tiro = int(request.form["tiro"] or 0)
+        jugador.dribling = int(request.form["dribling"] or 0)
+        jugador.velocidad = int(request.form["velocidad"] or 0)
+        jugador.pase = int(request.form["pase"] or 0)
+        jugador.defensa = int(request.form["defensa"] or 0)
+        jugador.salto = int(request.form["salto"] or 0)
+
+        jugador.fecha_nacimiento = fecha_nac
+        jugador.ciudad = request.form["ciudad"] or None
+        jugador.altura = float(request.form["altura"] or 0) if request.form["altura"] else None
+        jugador.mano_habil = request.form["mano_habil"] or None
+        jugador.especialidad = request.form["especialidad"] or None
+        jugador.jugada = request.form["jugada"] or None
+
+        jugador.foto_carnet = request.form["foto_carnet"] or None
+        jugador.media_day = request.form["media_day"] or None
+        jugador.foto_juego = request.form["foto_juego"] or None
+
+        db.session.commit()
+
+        flash("Jugador actualizado correctamente.", "success")
+        return redirect(url_for("admin_jugadores"))
+
+    return render_template("admin/jugadores_form.html",
+                           jugador=jugador,
+                           equipos=equipos)
+
+
+#eliminar
+@app.route("/admin/jugadores/<int:id>/eliminar")
+@login_required
+def admin_jugador_eliminar(id):
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    jugador = Jugador.query.get_or_404(id)
+
+    if jugador.aficionado_id is not None:
+        flash("No podés eliminar jugadores creados por aficionados.", "danger")
+        return redirect(url_for("admin_jugadores"))
+
+    db.session.delete(jugador)
+    db.session.commit()
+
+    flash("Jugador eliminado.", "success")
+    return redirect(url_for("admin_jugadores"))
+
+
+
+
+
+
+
+
+#ARTICULOS------------------------------
+@app.route("/admin/articulos")
+@login_required
+def admin_articulos():
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    q = request.args.get("q", "").strip()
+
+    if q:
+        articulos = Articulo.query.filter(
+            Articulo.titulo.ilike(f"%{q}%")|
+            Articulo.descripcion.ilike(f"%{q}%")
+        ).all()
+    else:
+        articulos = Articulo.query.all()
+
+    return render_template("admin/articulos_list.html", articulos=articulos, q=q)
+
+#crear
+@app.route("/admin/articulos/crear", methods=["GET", "POST"])
+@login_required
+def admin_articulos_crear():
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+        a = Articulo(
+            titulo=request.form["titulo"],
+            descripcion=request.form["descripcion"],
+            fecha=datetime.now().date(),      
+            portada=request.form["portada"] or None,
+            foto_1=request.form["foto_1"] or None,
+            foto_2=request.form["foto_2"] or None,
+            foto_3=request.form["foto_3"] or None
+        )
+
+        db.session.add(a)
+        db.session.commit()
+        flash("Artículo creado correctamente.", "success")
+        return redirect(url_for("admin_articulos"))
+
+    return render_template("admin/articulos_form.html", articulo=None)
+
+#editar
+@app.route("/admin/articulos/<int:id>/editar", methods=["GET", "POST"])
+@login_required
+def admin_articulos_editar(id):
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    articulo = Articulo.query.get_or_404(id)
+
+    if request.method == "POST":
+        articulo.titulo = request.form["titulo"]
+        articulo.descripcion = request.form["descripcion"]
+        articulo.portada = request.form["portada"] or None
+        articulo.foto_1 = request.form["foto_1"] or None
+        articulo.foto_2 = request.form["foto_2"] or None
+        articulo.foto_3 = request.form["foto_3"] or None
+
+        db.session.commit()
+        flash("Artículo actualizado.", "success")
+        return redirect(url_for("admin_articulos"))
+
+    return render_template("admin/articulos_form.html", articulo=articulo)
+
+#eliminar
+@app.route("/admin/articulos/<int:id>/eliminar")
+@login_required
+def admin_articulos_eliminar(id):
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    articulo = Articulo.query.get_or_404(id)
+
+    db.session.delete(articulo)
+    db.session.commit()
+
+    flash("Artículo eliminado correctamente.", "success")
+    return redirect(url_for("admin_articulos"))
+
+
+#EVENTOS--------------------------------
+@app.route("/admin/eventos")
+@login_required
+def admin_eventos():
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    q = request.args.get("q", "")
+
+    if q:
+        eventos = Evento.query.filter(Evento.titulo.ilike(f"%{q}%")).all()
+    else:
+        eventos = Evento.query.order_by(Evento.fecha_y_hora.desc()).all()
+
+    return render_template("admin/eventos_list.html", eventos=eventos, q=q)
+
+#crear
+@app.route("/admin/eventos/crear", methods=["GET", "POST"])
+@login_required
+def admin_eventos_crear():
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+        fecha_raw = request.form["fecha_y_hora"]
+        fecha = datetime.strptime(fecha_raw, "%Y-%m-%dT%H:%M")
+
+        e = Evento(
+            titulo=request.form["titulo"],
+            descripcion=request.form["descripcion"],
+            fecha_y_hora=fecha,
+            cap_max=request.form["cap_max"],
+            portada=request.form["portada"] or None,
+            foto_1=request.form["foto_1"] or None,
+        )
+
+        db.session.add(e)
+        db.session.commit()
+
+        flash("Evento creado correctamente.", "success")
+        return redirect(url_for("admin_eventos"))
+
+    return render_template("admin/eventos_form.html", evento=None)
+
+
+#editar
+@app.route("/admin/eventos/<int:id>/editar", methods=["GET", "POST"])
+@login_required
+def admin_eventos_editar(id):
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    evento = Evento.query.get_or_404(id)
+
+    if request.method == "POST":
+        fecha_raw = request.form["fecha_y_hora"]
+        fecha = datetime.strptime(fecha_raw, "%Y-%m-%dT%H:%M")
+
+        evento.titulo = request.form["titulo"]
+        evento.descripcion = request.form["descripcion"]
+        evento.fecha_y_hora = fecha
+        evento.cap_max = request.form["cap_max"]
+        evento.portada = request.form["portada"] or None
+        evento.foto_1 = request.form["foto_1"] or None
+
+        db.session.commit()
+
+        flash("Evento actualizado correctamente.", "success")
+        return redirect(url_for("admin_eventos"))
+
+    return render_template("admin/eventos_form.html", evento=evento)
+
+
+#eliminar
+@app.route("/admin/eventos/<int:id>/eliminar")
+@login_required
+def admin_eventos_eliminar(id):
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    evento = Evento.query.get_or_404(id)
+    db.session.delete(evento)
+    db.session.commit()
+
+    flash("Evento eliminado.", "success")
+    return redirect(url_for("admin_eventos"))
+
+
+
+#DTS------------------------------
+@app.route("/admin/dts")
+@login_required
+def admin_dts():
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    q = request.args.get("q", "").strip()
+
+    if q:
+        dts = DT.query.filter(
+            (DT.nombre.ilike(f"%{q}%")) |
+            (DT.apellido.ilike(f"%{q}%")) 
+        ).all()
+    else:
+        dts = DT.query.all()
+
+    return render_template("admin/dts_list.html", dts=dts, q=q)
+
+#crear
+@app.route("/admin/dts/crear", methods=["GET", "POST"])
+@login_required
+def admin_dts_crear():
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    equipos = Equipo.query.all()
+
+    if request.method == "POST":
+        fecha_str = request.form["fecha_nacimiento"]
+        fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date() if fecha_str else None
+
+        dt = DT(
+            nombre=request.form["nombre"],
+            apellido=request.form["apellido"],
+            fecha_nacimiento=fecha,
+            nacionalidad=request.form["nacionalidad"],
+            ciudad=request.form["ciudad"],
+            equipo_id=request.form["equipo_id"] or None,
+            temporadas=request.form["temporadas"],
+            foto=request.form["foto"] or None
+        )
+
+        db.session.add(dt)
+        db.session.commit()
+        flash("DT creado correctamente.", "success")
+        return redirect(url_for("admin_dts"))
+
+    return render_template("admin/dts_form.html", dt=None, equipos=equipos)
+
+#editar
+@app.route("/admin/dts/<int:id>/editar", methods=["GET", "POST"])
+@login_required
+def admin_dts_editar(id):
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    dt = DT.query.get_or_404(id)
+    equipos = Equipo.query.all()
+
+    if request.method == "POST":
+        fecha_str = request.form["fecha_nacimiento"]
+        fecha = datetime.strptime(fecha_str, "%Y-%m-%d").date() if fecha_str else None
+
+        dt.nombre = request.form["nombre"]
+        dt.apellido = request.form["apellido"]
+        dt.fecha_nacimiento = fecha
+        dt.nacionalidad = request.form["nacionalidad"]
+        dt.ciudad = request.form["ciudad"]
+        dt.equipo_id = request.form["equipo_id"] or None
+        dt.temporadas = request.form["temporadas"]
+        dt.foto = request.form["foto"] or None
+
+        db.session.commit()
+        flash("DT actualizado correctamente.", "success")
+        return redirect(url_for("admin_dts"))
+
+    return render_template("admin/dts_form.html", dt=dt, equipos=equipos)
+
+#eliminar
+@app.route("/admin/dts/<int:id>/eliminar")
+@login_required
+def admin_dts_eliminar(id):
+    if current_user.role != "admin":
+        return redirect(url_for("index"))
+
+    dt = DT.query.get_or_404(id)
+    db.session.delete(dt)
+    db.session.commit()
+    flash("DT eliminado correctamente.", "success")
+    return redirect(url_for("admin_dts"))
 
 
 # --------- INICIALIZAR ---------

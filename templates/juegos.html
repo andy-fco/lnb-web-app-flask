@@ -1,21 +1,22 @@
-<!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Juegos</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css') }}"
-    />
-  </head>
-  <body>
-    <h1>Juegos</h1>
-  </body>
-</html>
+{% extends "base.html" %} {% block title %}Juegos{% endblock %} {% block content
+%}
+
+<h1 class="text-3xl font-bold mb-6">Juegos</h1>
+
+<div
+  class="bg-secundario border border-gray-700 rounded-xl p-6 shadow-lg text-center"
+>
+  <h2 class="text-2xl font-semibold mb-4">¡Próximamente!</h2>
+  <p class="text-gray-400">
+    Los juegos estarán disponibles muy pronto. Vas a poder competir, ganar
+    puntos y mejorar tu jugador.
+  </p>
+
+  <div
+    class="w-full h-48 bg-gray-800 rounded-lg mt-6 flex items-center justify-center"
+  >
+    <span class="text-gray-500">[ Espacio reservado para mini-juegos ]</span>
+  </div>
+</div>
+
+{% endblock %}
