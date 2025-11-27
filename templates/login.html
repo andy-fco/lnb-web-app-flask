@@ -7,11 +7,6 @@
   >
     <h2 class="text-3xl font-bold mb-6 text-center">Iniciar sesión</h2>
 
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-    messages %} {% for category, msg in messages %}
-    <div class="alert alert-{{ category }}">{{ msg }}</div>
-    {% endfor %} {% endif %} {% endwith %}
-
     <form method="POST" class="space-y-5">
       <div>
         <label for="username" class="block mb-1 text-gray-300">Usuario</label>

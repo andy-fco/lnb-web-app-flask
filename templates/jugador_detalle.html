@@ -5,7 +5,7 @@ jugador.apellido }}{% endblock %} {% block content %}
   <div class="flex flex-col md:flex-row gap-8 items-start md:items-center">
     <!-- foto 4x4 -->
     <img
-      src="{{ url_for('static', filename='img/jugadores/' ~ (jugador.foto_carnet or 'placeholder_carnet.jpg')) }}"
+      src="{{ url_for('static', filename=jugador.foto_carnet or 'placeholder_carnet.jpg') }}"
       class="w-40 h-40 object-cover rounded-xl shadow-lg"
     />
 
@@ -76,7 +76,7 @@ jugador.apellido }}{% endblock %} {% block content %}
     <!-- fotogrande -->
     <div>
       <img
-        src="{{ url_for('static', filename='img/jugadores/' ~ (jugador.foto_juego or 'placeholder_full.jpg')) }}"
+        src="{{ url_for('static', filename=jugador.foto_juego or 'placeholder_full.jpg') }}"
         class="w-full rounded-xl shadow-lg object-cover h-[450px]"
       />
     </div>
